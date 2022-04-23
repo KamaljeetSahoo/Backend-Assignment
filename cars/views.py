@@ -21,12 +21,24 @@ def CarApiOverview(request):
 
 @api_view(['POST'])
 def addCars(request):
-    car = CarSerializer(data = request.data)
-    if car.is_valid():
+    car_serializer = CarSerializer(data = request.data)
+    if car_serializer.is_valid():
         if Car.objects.filter(email=request.data['email']).exists():
             raise Serializer.ValidationError("Email Already Exists")
         else:
-            car.save()
-            return Response(car.data)
+            car_serializer.save()
+            return Response(car_serializer.data)
     else:
-        return Response({"error":car.errors, "data":car.data}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error":car_serializer.errors, "data":car_serializer.data}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def fetchCars(request):
+    # checking for the parameters from the URL
+    if request.query_params:
+        cars = Car.objects.filter(**request.query_params.dict())
+    else:
+        cars = Car.objects.all()
+    if cars:
+        return Response(CarSerializer(cars, many=True).data)
+    else:
+        return Response("No Car records found")
