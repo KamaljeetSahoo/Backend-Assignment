@@ -1,4 +1,5 @@
 import email
+from turtle import update
 from django.http import HttpResponse
 from itsdangerous import Serializer
 from rest_framework.decorators import api_view
@@ -16,6 +17,8 @@ def CarApiOverview(request):
     api_urls = {
         'OverView API endpoints' : '/',
         'Add Car': '/addCar',
+        'Update Car Record': '/updateCars',
+        'Fetch All Cars': '/fetchCars',
     }
     return Response(api_urls)
 
@@ -42,3 +45,14 @@ def fetchCars(request):
         return Response(CarSerializer(cars, many=True).data)
     else:
         return Response("No Car records found")
+
+@api_view(['POST'])
+def updateCars(request, pk):
+    car = Car.objects.get(id=pk)
+    update_car_data = CarSerializer(instance=car, data=request.data)
+
+    if update_car_data.is_valid():
+        update_car_data.save()
+        return Response(update_car_data.data)
+    else:
+        return Response(update_car_data.errors)
