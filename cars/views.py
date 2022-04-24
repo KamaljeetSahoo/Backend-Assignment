@@ -1,6 +1,4 @@
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from itsdangerous import Serializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -32,7 +30,7 @@ def CarApiOverview(request):
 
 @api_view(['POST'])
 def addCars(request):
-    if check_auth(request.headers['Username'], request.headers['Password']):
+    if 'Username' in request.headers and 'Password' in request.headers and check_auth(request.headers['Username'], request.headers['Password']):
         car_serializer = CarSerializer(data = request.data)
         if car_serializer.is_valid():
             if Car.objects.filter(email=request.data['email']).exists(): #checking for existing email
@@ -48,7 +46,7 @@ def addCars(request):
 @api_view(['GET'])
 def fetchCars(request):
     # checking for the parameters from the URL
-    if check_auth(request.headers['Username'], request.headers['Password']):
+    if 'Username' in request.headers and 'Password' in request.headers and check_auth(request.headers['Username'], request.headers['Password']):
         if request.query_params:
             cars = Car.objects.filter(**request.query_params.dict()) # filtering categories
         else:
@@ -63,7 +61,7 @@ def fetchCars(request):
 # Update Car Record
 @api_view(['POST'])
 def updateCars(request, pk):
-    if check_auth(request.headers['Username'], request.headers['Password']):
+    if 'Username' in request.headers and 'Password' in request.headers and check_auth(request.headers['Username'], request.headers['Password']):
         car = Car.objects.get(id=pk)
         update_car_data = CarSerializer(instance=car, data=request.data)
 
@@ -78,7 +76,7 @@ def updateCars(request, pk):
 # Delete Car Record
 @api_view(['DELETE'])
 def deleteCar(request, pk):
-    if check_auth(request.headers['Username'], request.headers['Password']):
+    if 'Username' in request.headers and 'Password' in request.headers and check_auth(request.headers['Username'], request.headers['Password']):
         car = get_object_or_404(Car, id=pk)
         car.delete()
         return Response(status=status.HTTP_202_ACCEPTED)
