@@ -1,10 +1,9 @@
-import email
-from turtle import update
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from itsdangerous import Serializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import serializers, status
+from rest_framework import status
 from .models import Car
 from .serlializers import CarSerializer
 
@@ -56,3 +55,9 @@ def updateCars(request, pk):
         return Response(update_car_data.data)
     else:
         return Response(update_car_data.errors)
+
+@api_view(['DELETE'])
+def deleteCar(request, pk):
+    car = get_object_or_404(Car, id=pk)
+    car.delete()
+    return Response(status=status.HTTP_202_ACCEPTED)
